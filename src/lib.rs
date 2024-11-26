@@ -179,7 +179,7 @@ extern crate redis_macros_derive;
 mod json;
 
 #[cfg(feature = "json")]
-pub use json::Json;
+pub use json::{Json, JsonOpt, JsonVec};
 
 /// Derive macro for the redis crate's [`FromRedisValue`](../redis/trait.FromRedisValue.html) trait to allow parsing Redis responses to this type.
 /// 

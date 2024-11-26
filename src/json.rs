@@ -94,3 +94,47 @@ where
         }
     }
 }
+
+#[derive(Debug)]
+pub struct JsonVec<T>(pub Vec<T>);
+
+impl<T> ::redis::FromRedisValue for JsonVec<T>
+where
+    T: DeserializeOwned,
+{
+    fn from_redis_value(v: &Value) -> RedisResult<Self> {
+        match *v {
+            Value::Array(ref arr) => {
+                let mut vec = Vec::with_capacity(arr.len());
+                for val in arr.iter() {
+                    match Json::from_redis_value(val) {
+                        Ok(Json(val)) => vec.push(val),
+                        Err(e) => return Err(e),
+                    }
+                }
+                Ok(JsonVec(vec))
+            }
+            _ => Err(::redis::RedisError::from((
+                ::redis::ErrorKind::TypeError,
+                "Response was of incompatible type",
+                format!("Response type not a RedisJSON deserializable Array. (response was {v:?})"),
+            ))),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct JsonOpt<T>(pub Option<T>);
+
+impl<T> ::redis::FromRedisValue for JsonOpt<T>
+where
+    T: DeserializeOwned,
+{
+    fn from_redis_value(v: &Value) -> RedisResult<Self> {
+        match *v {
+            Value::Nil => Ok(JsonOpt(None)),
+            _ => Json::<T>::from_redis_value(&v)
+                .map(|Json(val)| JsonOpt(Some(val))),
+        }
+    }
+}
