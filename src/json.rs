@@ -105,14 +105,10 @@ where
     fn from_redis_value(v: &Value) -> RedisResult<Self> {
         match *v {
             Value::Array(ref arr) => {
-                let mut vec = Vec::with_capacity(arr.len());
-                for val in arr.iter() {
-                    match Json::from_redis_value(val) {
-                        Ok(Json(val)) => vec.push(val),
-                        Err(e) => return Err(e),
-                    }
-                }
-                Ok(JsonVec(vec))
+                Ok(JsonVec(arr.iter().try_fold(Vec::with_capacity(arr.len()), |mut acc, val| {
+                    acc.push(Json::from_redis_value(val)?.0);
+                    Result::<Vec<T>, redis::RedisError>::Ok(acc)
+                })?))
             }
             _ => Err(::redis::RedisError::from((
                 ::redis::ErrorKind::TypeError,

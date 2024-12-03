@@ -50,6 +50,37 @@ async fn main() -> RedisResult<()> {
     let JsonVec(stored_user): JsonVec<User> = con.json_get(&keys, "$").await?;
     assert_eq!(expected, stored_user);
 
+    // Passing an empty array as keys should return an error
+    assert!(con.json_get::<&[&str], &str, JsonVec<User>>(&[], "$").await.is_err());
+
+    // Failing to find a key should return an error, not an empty array
+    let keys = vec!["some_key_that_should_not_exist", "some_key_that_should_not_exist"];
+    match con.json_get::<Vec<&str>, &str, JsonVec<User>>(keys, "$").await {
+        Ok(JsonVec(vec)) => panic!("this should return an error, but found this: {vec:?}"),
+        Err(_) => (),
+    }
+
+    // Failing to find a key should return an error, not an empty array.
+    let keys = vec!["some_key_that_should_not_exist"];
+    match con.json_get::<Vec<&str>, &str, JsonVec<User>>(keys, "$").await {
+        Ok(JsonVec(vec)) => panic!("this should return an error, but found this: {vec:?}"),
+        Err(_) => (),
+    }
+
+    // Finding some keys and not others should return an error
+    let keys = vec!["user_key_0", "some_key_that_should_not_exist"];
+    match con.json_get::<Vec<&str>, &str, JsonVec<User>>(keys, "$").await {
+        Ok(JsonVec(vec)) => panic!("this should return an error, but found this: {vec:?}"),
+        Err(_) => (),
+    }
+
+    // Finding some keys and not others should return an error
+    let keys = vec!["user_key_0", "user_key_1", "some_key_that_should_not_exist"];
+    match con.json_get::<Vec<&str>, &str, JsonVec<User>>(keys, "$").await {
+        Ok(JsonVec(vec)) => panic!("this should return an error, but found this: {vec:?}"),
+        Err(_) => (),
+    }
+
     Ok(())
 }
 

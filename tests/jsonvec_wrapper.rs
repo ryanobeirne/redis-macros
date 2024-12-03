@@ -127,28 +127,11 @@ pub fn it_should_fail_if_input_is_not_valid_utf8() {
 
 #[test]
 pub fn it_should_fail_if_input_is_missing() {
-    let val = Value::Nil;
-    let values = three_value_array(val);
-
-    match JsonVec::<User>::from_redis_value(&values) {
+    match JsonVec::<User>::from_redis_value(&Value::Nil) {
         Ok(val) => panic!("Value Nil should fail: {val:?}"),
         Err(err) => assert_eq!(
             err.to_string(),
-            "Response was of incompatible type - TypeError: Response type not RedisJSON deserializable. (response was nil)"
-                .to_string()
-        ),
-    }
-}
-
-#[test]
-pub fn it_should_fail_if_input_is_not_array() {
-    let val = Value::Nil;
-
-    match JsonVec::<User>::from_redis_value(&val) {
-        Ok(val) => panic!("Value Nil should fail: {val:?}"),
-        Err(err) => assert_eq!(
-            err.to_string(),
-            "Response was of incompatible type - TypeError: Response type not a RedisJSON deserializable Array. (response was nil)".to_string()
+            "Response was of incompatible type - TypeError: Response type not a RedisJSON deserializable Array. (response was nil)"
         ),
     }
 }
