@@ -1,5 +1,20 @@
 # Changelog
 
+## [Unreleased]
+
+## [0.5.0] - 2025-01-21
+
+### Updated
+
+- Update dependencies to support Redis 0.28
+- Fix examples
+
+## [0.4.3] - 2024-12-27
+
+### Updated
+
+- Update dependencies to fix issue with punycode parsing in idna
+
 ## [0.4.2] - 2024-09-15
 
 ### Updated
